@@ -1,0 +1,62 @@
+SELECT g.Name, gen.Name genero,
+(gr.Positive *100 / (gr.Positive + gr.Negative)) avaliacoes_positivas,
+gr.Positive + gr.Negative total_avaliacoes, 
+g.Release_date data_lancamento
+FROM Games g
+JOIN Game_Genres gagen ON (gagen.AppID = g.AppID)
+JOIN Genres gen ON (gagen.GenreID = gen.GenreID)
+JOIN GameReviews gr ON (g.AppID  = gr.AppID)
+WHERE gen.Name = 'RPG' AND 
+(gr.Positive *100 / (gr.Positive + gr.Negative)) >= 80 AND
+gr.Positive + gr.Negative >= 10000 AND
+g.Release_date >= CURRENT_DATE - INTERVAL '6 MONTH'
+
+SELECT g.Name, gp.Price, gs.Average_playtime_forever
+FROM Games g
+JOIN GamePricing gp ON (gp.AppID = g.AppID)
+JOIN GameStats gs ON (gs.AppID = g.AppID)
+JOIN GamePlatforms gpl ON (gpl.AppId = g.AppID)
+JOIN Platforms p ON (gpl.PlatformID = p.PlatformID)
+WHERE gp.Price <= 20 AND gs.Average_playtime_forever >= 120
+GROUP BY g.AppID, g.Name, gp.Price, gs.Average_playtime_forever
+HAVING COUNT(DISTINCT p.Name) = 3 
+   AND SUM(CASE WHEN p.Name IN ('Windows','Mac','Linux') THEN 1 ELSE 0 END) = 3;
+
+SELECT d.Name desenvolvedor, COUNT(g.AppID) total_lancamentos, AVG(gr.User_score)media_score
+FROM Games g
+JOIN Game_Developers gd ON (gd.AppID = g.AppID)
+JOIN Developers d ON (gd.DeveloperID = d.DeveloperID)
+JOIN GameReviews gr ON (g.AppID = gr.AppID)
+WHERE g.Release_date >= CURRENT_DATE - INTERVAL '12 MONTH'
+GROUP BY d.DeveloperID, d.Name
+HAVING COUNT(g.AppID) > 5
+ORDER BY media_score DESC;
+
+SELECT gen.Name genero, COUNT(*) quantidade_jogos
+FROM Games g
+JOIN GamePricing gp ON (gp.AppID = g.AppID)
+JOIN GameStats gs ON (gs.AppID = g.AppID)
+JOIN Game_Genres gg ON (gg.AppID = g.AppID)
+JOIN Genres gen ON (gen.GenreID = gg.GenreID)
+WHERE gp.Price > 0 AND 
+gs.Median_playtime_forever > 240 AND 
+g.Release_date >= CURRENT_DATE - INTERVAL '3 MONTH'
+GROUP BY gen.Name
+ORDER BY quantidade_jogos DESC
+LIMIT 5;
+
+SELECT t.Name tag, COUNT(*) quantidade
+FROM (
+    SELECT g.AppID
+    FROM Games g
+    JOIN GameReviews gr ON (gr.AppID = g.AppID)
+    WHERE g.Release_date >= CURRENT_DATE - INTERVAL '6 MONTH'
+	AND gr.Positive + gr.Negative > 0
+    ORDER BY (gr.Positive * 1.0 / (gr.Positive + gr.Negative)) DESC
+    LIMIT 100
+) top_games
+JOIN Game_Tags gt ON (gt.AppID = top_games.AppID)
+JOIN Tags t ON t.TagID = gt.TagID
+GROUP BY t.Name
+ORDER BY quantidade DESC
+LIMIT 1;

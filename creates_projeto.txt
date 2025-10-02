@@ -1,0 +1,161 @@
+CREATE TABLE Games (
+    AppID BIGINT PRIMARY KEY,
+    Name TEXT UNIQUE,
+    Release_date DATE,
+    Required_age INTEGER,
+    About_the_game TEXT,
+    Header_image TEXT,
+    Notes TEXT
+);
+
+
+CREATE TABLE GameContacts (
+    AppID BIGINT PRIMARY KEY,
+    Website TEXT,
+    Support_url TEXT,
+    Support_email TEXT,
+    FOREIGN KEY (AppID) REFERENCES Games(AppID)
+);
+
+
+CREATE TABLE GamePricing (
+    AppID BIGINT PRIMARY KEY,
+    Price DECIMAL(10,2) NOT NULL,
+    Discount DECIMAL(5,2),
+    FOREIGN KEY (AppID) REFERENCES Games(AppID)
+);
+
+
+CREATE TABLE GameReviews (
+    AppID BIGINT PRIMARY KEY,
+    Positive INTEGER,
+    Negative INTEGER,
+    User_score DECIMAL(5,2),
+    Score_rank INTEGER,
+    Recommendations INTEGER,
+    FOREIGN KEY (AppID) REFERENCES Games(AppID)
+);
+
+CREATE TABLE Reviews (
+    AppID BIGINT NOT NULL,
+    ReviewId SERIAL PRIMARY KEY,
+    ReviewText TEXT,
+    FOREIGN KEY (AppID) REFERENCES Games(AppID)
+
+);
+
+
+CREATE TABLE GameStats (
+    AppID BIGINT PRIMARY KEY,
+    Estimated_owners VARCHAR(30),
+    Peak_CCU INTEGER,
+    DLC_Count INTEGER,
+    Achievements INTEGER,
+    Average_playtime_forever INTEGER,
+    Average_playtime_two_weeks INTEGER,
+    Median_playtime_forever INTEGER,
+    Median_playtime_two_weeks INTEGER,
+    FOREIGN KEY (AppID) REFERENCES Games(AppID)
+);
+
+CREATE TABLE Platforms (
+	PlatformId SERIAL PRIMARY KEY,
+	Name TEXT UNIQUE NOT NULL,
+	CHECK (Name IN ('Windows', 'Mac', 'Linux'))
+);
+
+
+CREATE TABLE GamePlatforms (
+    AppID BIGINT NOT NULL,
+    PlatformId INTEGER NOT NULL,
+    PRIMARY KEY (AppID, PlatformId),
+    FOREIGN KEY (AppID) REFERENCES Games(AppID),
+    FOREIGN KEY (PlatformId) REFERENCES Platforms(PlatformId)
+);
+
+CREATE TABLE Developers (
+    DeveloperID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Developers (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    DeveloperID INT NOT NULL REFERENCES Developers(DeveloperID),
+    PRIMARY KEY (AppID, DeveloperID)
+);
+
+
+CREATE TABLE Publishers (
+    PublisherID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Publishers (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    PublisherID INT NOT NULL REFERENCES Publishers(PublisherID),
+    PRIMARY KEY (AppID, PublisherID)
+);
+
+
+CREATE TABLE Categories (
+    CategorieID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Categories (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    CategorieID INT NOT NULL REFERENCES Categories(CategorieID),
+    PRIMARY KEY (AppID, CategorieID)
+);
+
+
+CREATE TABLE Genres (
+    GenreID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Genres (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    GenreID INT NOT NULL REFERENCES Genres(GenreID),
+    PRIMARY KEY (AppID, GenreID)
+);
+
+
+CREATE TABLE Tags (
+    TagID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Tags (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    TagID INT NOT NULL REFERENCES Tags(TagID),
+    PRIMARY KEY (AppID, TagID)
+);
+
+
+CREATE TABLE Languages (
+    LanguageID SERIAL PRIMARY KEY,
+    Name TEXT UNIQUE NOT NULL
+);
+CREATE TABLE Game_Languages (
+    AppID BIGINT NOT NULL REFERENCES Games(AppID),
+    LanguageID INT NOT NULL REFERENCES Languages(LanguageID),
+    Full_audio BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (AppID, LanguageID)
+);
+
+
+CREATE TABLE Metacritic (
+    AppID BIGINT PRIMARY KEY REFERENCES Games(AppID),
+    MetacriticScore INTEGER,
+    MetacriticUrl TEXT
+);
+
+
+CREATE TABLE Screenshots (
+    ScreenshotID SERIAL PRIMARY KEY,
+    AppID BIGINT REFERENCES Games(AppID),
+    Url TEXT UNIQUE
+);
+
+
+CREATE TABLE Movies (
+    MovieID SERIAL PRIMARY KEY,
+    AppID BIGINT REFERENCES Games(AppID),
+    Url TEXT UNIQUE
+);
